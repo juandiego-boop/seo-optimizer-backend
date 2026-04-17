@@ -9,24 +9,34 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f8;color:#333}
 .header{background:#008060;color:white;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
 .header h1{font-size:1.2rem;font-weight:600}
-.credits-badge{background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:20px;font-size:.9rem}
+.credits-badge{background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:20px;font-size:.9rem;font-weight:600}
 .container{max-width:1000px;margin:0 auto;padding:2rem}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
 .stat-card{background:white;padding:1.5rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center}
 .stat-card .num{font-size:2rem;font-weight:700;color:#008060}
 .stat-card .label{font-size:.85rem;color:#666;margin-top:.3rem}
 .section-title{font-size:1.1rem;font-weight:600;margin-bottom:1rem;color:#333}
+.free-banner{background:linear-gradient(135deg,#008060,#00a47a);color:white;padding:1rem 1.5rem;border-radius:8px;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
+.free-banner .icon{font-size:1.5rem}
+.free-banner strong{display:block;font-size:1rem}
+.free-banner span{font-size:.85rem;opacity:.9}
 .products-grid{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem}
-.product-card{background:white;border-radius:8px;padding:1rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:1rem}
+.product-card{background:white;border-radius:8px;padding:1rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:box-shadow .2s}
+.product-card.optimized{border-left:4px solid #008060}
+.product-card-top{display:flex;align-items:center;gap:1rem}
 .product-info{flex:1}
 .product-title{font-weight:500;font-size:.95rem}
-.product-desc{font-size:.8rem;color:#666;margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px}
+.product-desc{font-size:.8rem;color:#666;margin-top:.25rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.product-seo-result{margin-top:.75rem;padding:.75rem;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;display:none}
+.product-seo-result.show{display:block}
+.seo-row{margin-bottom:.4rem;font-size:.8rem}
+.seo-label{font-weight:600;color:#008060}
+.seo-value{color:#333;margin-top:.1rem}
 .btn{padding:.5rem 1.2rem;border-radius:6px;border:none;cursor:pointer;font-size:.875rem;font-weight:500;transition:all .2s}
 .btn-primary{background:#008060;color:white}
 .btn-primary:hover{background:#006e52}
 .btn-primary:disabled{background:#ccc;cursor:not-allowed}
-.btn-outline{background:white;color:#008060;border:1.5px solid #008060}
-.btn-outline:hover{background:#f0fdf4}
+.btn-success{background:#16a34a;color:white;cursor:default}
 .plans-section{background:white;border-radius:8px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2rem}
 .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
 .plan-card{border:2px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:center;position:relative;transition:border-color .2s}
@@ -37,27 +47,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .plan-price{font-size:1.5rem;font-weight:800;color:#008060}
 .plan-price span{font-size:.85rem;color:#666;font-weight:400}
 .plan-credits{font-size:.85rem;color:#666;margin:.5rem 0 1rem}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#333;color:white;padding:.75rem 1.5rem;border-radius:8px;font-size:.875rem;opacity:0;transition:opacity .3s;z-index:999}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#333;color:white;padding:.75rem 1.5rem;border-radius:8px;font-size:.875rem;opacity:0;transition:opacity .3s;z-index:999;max-width:300px}
 .toast.show{opacity:1}
 .loading{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .history-section{background:white;border-radius:8px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.history-item{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid #f0f0f0;font-size:.875rem}
+.history-item{padding:.75rem 0;border-bottom:1px solid #f0f0f0;font-size:.875rem}
 .history-item:last-child{border-bottom:none}
+.history-date{color:#999;font-size:.75rem;text-align:right}
 .before{color:#999;text-decoration:line-through;font-size:.8rem}
-.after{color:#008060;font-weight:500}
+.after-title{color:#008060;font-weight:500}
+.after-desc{color:#555;font-size:.78rem;margin-top:.2rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style>
 </head>
 <body>
 <div class="header">
   <h1>🚀 SEO Optimizer Pro</h1>
-  <div class="credits-badge" id="creditsBadge">Cargando...</div>
+  <div class="credits-badge" id="creditsBadge">...</div>
 </div>
 <div class="container">
   <div class="stats">
     <div class="stat-card"><div class="num" id="totalProducts">-</div><div class="label">Productos totales</div></div>
-    <div class="stat-card"><div class="num" id="creditsLeft" style="color:#008060">-</div><div class="label">Créditos disponibles</div></div>
+    <div class="stat-card"><div class="num" id="creditsLeft">-</div><div class="label">Créditos disponibles</div></div>
     <div class="stat-card"><div class="num" id="optimizedCount">0</div><div class="label">Optimizados hoy</div></div>
+  </div>
+
+  <div class="free-banner">
+    <div class="icon">🎁</div>
+    <div>
+      <strong>¡100 créditos gratis al instalar!</strong>
+      <span>Optimiza título y descripción de tus productos con IA. Compra más créditos cuando los necesites.</span>
+    </div>
   </div>
 
   <p class="section-title">Productos de tu tienda</p>
@@ -66,7 +86,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <div class="plans-section">
-    <p class="section-title">💳 Comprar créditos</p>
+    <p class="section-title">💳 Comprar más créditos</p>
     <div class="plans-grid" id="plansGrid">Cargando planes...</div>
   </div>
 
@@ -78,135 +98,162 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://seo-plugins-seo-backend.g6kmjk.easypanel.host';
-let shopData = {};
-let optimizedToday = 0;
+const API='https://seo-plugins-seo-backend.g6kmjk.easypanel.host';
+let shopData={};
+let optimizedToday=0;
 
-function showToast(msg, ok=true) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = ok ? '#16a34a' : '#dc2626';
+function showToast(msg,ok=true){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=ok?'#16a34a':'#dc2626';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-async function loadData() {
-  try {
-    const [meResp, prodResp, histResp, plansResp] = await Promise.all([
-      fetch(API+'/api/me', {credentials:'include'}),
-      fetch(API+'/api/products', {credentials:'include'}),
-      fetch(API+'/api/optimizations', {credentials:'include'}),
-      fetch(API+'/payments/plans', {credentials:'include'})
+async function loadData(){
+  try{
+    const[meR,prodR,histR,plansR]=await Promise.all([
+      fetch(API+'/api/me',{credentials:'include'}),
+      fetch(API+'/api/products',{credentials:'include'}),
+      fetch(API+'/api/optimizations',{credentials:'include'}),
+      fetch(API+'/payments/plans',{credentials:'include'})
     ]);
-    shopData = await meResp.json();
-    const {products} = await prodResp.json();
-    const {optimizations} = await histResp.json();
-    const {plans} = await plansResp.json();
+    shopData=await meR.json();
+    const{products}=await prodR.json();
+    const{optimizations}=await histR.json();
+    const{plans}=await plansR.json();
 
-    document.getElementById('creditsBadge').textContent = shopData.is_unlimited ? '∞ Ilimitado' : shopData.credits + ' créditos';
-    document.getElementById('creditsLeft').textContent = shopData.is_unlimited ? '∞' : shopData.credits;
-    document.getElementById('totalProducts').textContent = products?.length || 0;
+    const credText=shopData.is_unlimited?'∞ Ilimitado':(shopData.credits||0)+' créditos';
+    document.getElementById('creditsBadge').textContent=credText;
+    document.getElementById('creditsLeft').textContent=shopData.is_unlimited?'∞':(shopData.credits||0);
+    document.getElementById('totalProducts').textContent=products?.length||0;
 
-    const today = new Date().toDateString();
-    optimizedToday = optimizations?.filter(o => new Date(o.created_at).toDateString() === today).length || 0;
-    document.getElementById('optimizedCount').textContent = optimizedToday;
+    const today=new Date().toDateString();
+    optimizedToday=optimizations?.filter(o=>new Date(o.created_at).toDateString()===today).length||0;
+    document.getElementById('optimizedCount').textContent=optimizedToday;
 
-    renderProducts(products || []);
-    renderPlans(plans || []);
-    renderHistory(optimizations || []);
-  } catch(e) {
-    showToast('Error cargando datos', false);
-  }
+    renderProducts(products||[],optimizations||[]);
+    renderPlans(plans||[]);
+    renderHistory(optimizations||[]);
+  }catch(e){showToast('Error cargando datos',false);}
 }
 
-function renderProducts(products) {
-  const el = document.getElementById('productsList');
-  if (!products.length) { el.innerHTML = '<div style="color:#666;padding:1rem">No hay productos</div>'; return; }
-  el.innerHTML = products.map(p => {
-    const desc = (p.body_html || '').replace(/<[^>]*>/g,'').slice(0,80) || 'Sin descripción';
-    return `<div class="product-card" id="pc-${p.id}">
-      <div class="product-info">
-        <div class="product-title">${p.title}</div>
-        <div class="product-desc">${desc}</div>
+function renderProducts(products,optimizations){
+  const el=document.getElementById('productsList');
+  if(!products.length){el.innerHTML='<div style="color:#666;padding:1rem">No hay productos</div>';return;}
+  const optimizedIds=new Set(optimizations.map(o=>o.product_id));
+  el.innerHTML=products.map(p=>{
+    const desc=(p.body_html||'').replace(/<[^>]*>/g,'').slice(0,120)||'Sin descripción';
+    const wasOpt=optimizedIds.has(String(p.id));
+    return `<div class="product-card ${wasOpt?'optimized':''}" id="pc-${p.id}">
+      <div class="product-card-top">
+        <div class="product-info">
+          <div class="product-title" id="pt-${p.id}">${p.title}</div>
+          <div class="product-desc" id="pd-${p.id}">${desc}</div>
+        </div>
+        <button class="${wasOpt?'btn btn-success':'btn btn-primary'}" id="btn-${p.id}" onclick="optimizeProduct('${p.id}',this)">
+          ${wasOpt?'✅ Optimizado':'Optimizar SEO'}
+        </button>
       </div>
-      <button class="btn btn-primary" onclick="optimizeProduct('${p.id}', this)">Optimizar SEO</button>
+      <div class="product-seo-result ${wasOpt?'':'hide'}" id="seo-${p.id}"></div>
     </div>`;
   }).join('');
 }
 
-function renderPlans(plans) {
-  const labels = ['starter','growth','pro'];
-  const el = document.getElementById('plansGrid');
-  el.innerHTML = plans.map((p,i) => `
+function renderPlans(plans){
+  const labels=['starter','growth','pro'];
+  const el=document.getElementById('plansGrid');
+  el.innerHTML=plans.map((p,i)=>`
     <div class="plan-card ${i===1?'popular':''}">
       ${i===1?'<div class="plan-badge">⭐ Más popular</div>':''}
-      <div class="plan-name">${p.name.split('-')[0].trim()}</div>
-      <div class="plan-price">$${(p.priceCOP/1000).toFixed(0)}K <span>COP</span></div>
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-price">$${Math.round(p.priceCOP/1000)}K <span>COP</span></div>
       <div class="plan-credits">${p.credits} créditos SEO</div>
       <button class="btn btn-primary" style="width:100%" onclick="buyPlan('${labels[i]}')">Comprar</button>
     </div>`).join('');
 }
 
-function renderHistory(opts) {
-  const el = document.getElementById('historyList');
-  if (!opts.length) { el.innerHTML = '<div style="color:#666;font-size:.875rem">Sin optimizaciones aún.</div>'; return; }
-  el.innerHTML = opts.slice(0,10).map(o => `
-    <div class="history-item">
-      <div>
-        <div class="before">${o.original_title}</div>
-        <div class="after">→ ${o.optimized_title}</div>
+function renderHistory(opts){
+  const el=document.getElementById('historyList');
+  if(!opts.length){el.innerHTML='<div style="color:#666;font-size:.875rem">Sin optimizaciones aún.</div>';return;}
+  el.innerHTML=opts.slice(0,10).map(o=>{
+    const descOpt=(o.optimized_desc||'').replace(/<[^>]*>/g,'').slice(0,150);
+    return `<div class="history-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">
+        <div style="flex:1">
+          <div class="before">${o.original_title}</div>
+          <div class="after-title">→ ${o.optimized_title}</div>
+          ${descOpt?'<div class="after-desc">'+descOpt+'</div>':''}
+        </div>
+        <div class="history-date">${new Date(o.created_at).toLocaleDateString('es-CO')}</div>
       </div>
-      <div style="color:#999;font-size:.75rem">${new Date(o.created_at).toLocaleDateString('es-CO')}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-async function optimizeProduct(productId, btn) {
-  if (!shopData.is_unlimited && shopData.credits <= 0) {
-    showToast('Sin créditos. Compra un plan para continuar.', false); return;
+async function optimizeProduct(productId,btn){
+  if(!shopData.is_unlimited&&shopData.credits<=0){
+    showToast('Sin créditos. Compra un plan para continuar.',false);return;
   }
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loading"></span>Optimizando...';
-  try {
-    const resp = await fetch(API+'/api/optimize/'+productId, {
-      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}
+  const orig=btn.textContent;
+  btn.disabled=true;
+  btn.innerHTML='<span class="loading"></span>Optimizando...';
+  try{
+    const resp=await fetch(API+'/api/optimize/'+productId,{
+      method:'POST',credentials:'include',headers:{'Content-Type':'application/json'}
     });
-    const data = await resp.json();
-    if (data.success) {
-      showToast('✅ Producto optimizado con IA');
-      shopData.credits = data.credits;
-      document.getElementById('creditsBadge').textContent = data.is_unlimited ? '∞ Ilimitado' : data.credits + ' créditos';
-      document.getElementById('creditsLeft').textContent = data.is_unlimited ? '∞' : data.credits;
+    const data=await resp.json();
+    if(data.success){
+      showToast('✅ Título y descripción optimizados con IA');
+      shopData.credits=data.credits;
+      const cred=data.is_unlimited?'∞ Ilimitado':data.credits+' créditos';
+      document.getElementById('creditsBadge').textContent=cred;
+      document.getElementById('creditsLeft').textContent=data.is_unlimited?'∞':data.credits;
       optimizedToday++;
-      document.getElementById('optimizedCount').textContent = optimizedToday;
-      btn.textContent = '✅ Optimizado';
-      btn.style.background = '#16a34a';
-      // Actualizar título en la card
-      const card = document.getElementById('pc-'+productId);
-      if (card) card.querySelector('.product-title').textContent = data.seo.title;
-    } else {
-      showToast(data.error || 'Error al optimizar', false);
-      btn.disabled = false; btn.textContent = original;
+      document.getElementById('optimizedCount').textContent=optimizedToday;
+      btn.className='btn btn-success';
+      btn.innerHTML='✅ Optimizado';
+
+      // Actualizar título y descripción en la card
+      const titleEl=document.getElementById('pt-'+productId);
+      const descEl=document.getElementById('pd-'+productId);
+      if(titleEl)titleEl.textContent=data.seo.title;
+      const newDesc=(data.seo.body_html||'').replace(/<[^>]*>/g,'').slice(0,120);
+      if(descEl)descEl.textContent=newDesc;
+
+      // Mostrar resultado SEO completo
+      const card=document.getElementById('pc-'+productId);
+      if(card){card.classList.add('optimized');}
+      const seoEl=document.getElementById('seo-'+productId);
+      if(seoEl){
+        seoEl.innerHTML=`
+          <div class="seo-row"><span class="seo-label">📝 Nuevo título:</span><div class="seo-value">${data.seo.title}</div></div>
+          <div class="seo-row"><span class="seo-label">📄 Meta descripción:</span><div class="seo-value">${data.seo.meta_description}</div></div>
+          <div class="seo-row"><span class="seo-label">🖼️ Alt de imagen:</span><div class="seo-value">${data.seo.image_alt||'N/A'}</div></div>
+        `;
+        seoEl.classList.add('show');
+      }
+    }else{
+      showToast(data.error||'Error al optimizar',false);
+      btn.disabled=false;btn.innerHTML=orig;
     }
-  } catch(e) {
-    showToast('Error de red', false);
-    btn.disabled = false; btn.textContent = original;
+  }catch(e){
+    showToast('Error de red',false);
+    btn.disabled=false;btn.innerHTML=orig;
   }
 }
 
-async function buyPlan(planId) {
-  try {
-    const resp = await fetch(API+'/payments/create-checkout', {
-      method:'POST', credentials:'include',
+async function buyPlan(planId){
+  try{
+    const resp=await fetch(API+'/payments/create-checkout',{
+      method:'POST',credentials:'include',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({plan: planId})
+      body:JSON.stringify({plan:planId})
     });
-    const data = await resp.json();
-    if (data.url) { window.location.href = data.url; }
-    else showToast(data.error || 'Error creando pago', false);
-  } catch(e) {
-    showToast('Error de red', false);
-  }
+    const data=await resp.json();
+    if(data.url)window.location.href=data.url;
+    else showToast(data.error||'Error creando pago',false);
+  }catch(e){showToast('Error de red',false);}
 }
 
 loadData();
