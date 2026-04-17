@@ -21,18 +21,18 @@ app.use('/api',productRoutes);
 app.use('/api',optimizeRoutes);
 app.use('/',adminRoutes);
 app.use('/',paymentsRoutes);
-app.get('/health',(req,res)=>res.json({status:'ok',ts:new Date().toISOString()}));
-app.get('/api/me',async(req,res)=>{
+app.get('/health',function(req,res){res.json({status:'ok',ts:new Date().toISOString()});});
+app.get('/api/me',async function(req,res){
   if(!req.session||!req.session.shopId)return res.status(401).json({error:'No autenticado'});
-  const s=await pool.query('SELECT shop_domain,plan,credits,is_unlimited FROM shops WHERE id=$1',[req.session.shopId]);
+  var s=await pool.query('SELECT shop_domain,plan,credits,is_unlimited FROM shops WHERE id=$1',[req.session.shopId]);
   res.json(s.rows[0]||{});
 });
-app.get('/app',(req,res)=>res.sendFile(path.join(__dirname,'../public/index.html')));
-app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'../public/index.html')));
+app.get('/app',function(req,res){res.sendFile(path.join(__dirname,'../public/index.html'));});
+app.get('/',function(req,res){res.sendFile(path.join(__dirname,'../public/index.html'));});
 app.use(express.static(path.join(__dirname,'../public')));
-app.listen(PORT,'0.0.0.0',async()=>{
+app.listen(PORT,'0.0.0.0',async function(){
   console.log('SEO Backend en puerto '+PORT);
-  const c=await pool.connect();
+  var c=await pool.connect();
   try{
     await c.query('CREATE TABLE IF NOT EXISTS shops(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),shop_domain TEXT UNIQUE NOT NULL,access_token TEXT NOT NULL,plan TEXT DEFAULT \'starter\',credits INTEGER DEFAULT 100,is_unlimited BOOLEAN DEFAULT FALSE,created_at TIMESTAMPTZ DEFAULT NOW())');
     await c.query('CREATE TABLE IF NOT EXISTS licenses(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),shop_id UUID REFERENCES shops(id),api_key_hash TEXT UNIQUE NOT NULL,label TEXT,is_active BOOLEAN DEFAULT TRUE,created_at TIMESTAMPTZ DEFAULT NOW())');
