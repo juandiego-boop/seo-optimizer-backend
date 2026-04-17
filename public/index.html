@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEO Optimizer Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f8;color:#333}
+.header{background:#008060;color:white;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:1.2rem;font-weight:600}
+.credits-badge{background:rgba(255,255,255,.2);padding:.4rem 1rem;border-radius:20px;font-size:.9rem}
+.container{max-width:1000px;margin:0 auto;padding:2rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:white;padding:1.5rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center}
+.stat-card .num{font-size:2rem;font-weight:700;color:#008060}
+.stat-card .label{font-size:.85rem;color:#666;margin-top:.3rem}
+.section-title{font-size:1.1rem;font-weight:600;margin-bottom:1rem;color:#333}
+.products-grid{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem}
+.product-card{background:white;border-radius:8px;padding:1rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:1rem}
+.product-info{flex:1}
+.product-title{font-weight:500;font-size:.95rem}
+.product-desc{font-size:.8rem;color:#666;margin-top:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px}
+.btn{padding:.5rem 1.2rem;border-radius:6px;border:none;cursor:pointer;font-size:.875rem;font-weight:500;transition:all .2s}
+.btn-primary{background:#008060;color:white}
+.btn-primary:hover{background:#006e52}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.btn-outline{background:white;color:#008060;border:1.5px solid #008060}
+.btn-outline:hover{background:#f0fdf4}
+.plans-section{background:white;border-radius:8px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2rem}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.plan-card{border:2px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:center;position:relative;transition:border-color .2s}
+.plan-card:hover{border-color:#008060}
+.plan-card.popular{border-color:#008060}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#008060;color:white;font-size:.7rem;padding:.2rem .75rem;border-radius:20px;white-space:nowrap}
+.plan-name{font-weight:700;font-size:1rem;margin-bottom:.5rem}
+.plan-price{font-size:1.5rem;font-weight:800;color:#008060}
+.plan-price span{font-size:.85rem;color:#666;font-weight:400}
+.plan-credits{font-size:.85rem;color:#666;margin:.5rem 0 1rem}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#333;color:white;padding:.75rem 1.5rem;border-radius:8px;font-size:.875rem;opacity:0;transition:opacity .3s;z-index:999}
+.toast.show{opacity:1}
+.loading{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.history-section{background:white;border-radius:8px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid #f0f0f0;font-size:.875rem}
+.history-item:last-child{border-bottom:none}
+.before{color:#999;text-decoration:line-through;font-size:.8rem}
+.after{color:#008060;font-weight:500}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🚀 SEO Optimizer Pro</h1>
+  <div class="credits-badge" id="creditsBadge">Cargando...</div>
+</div>
+<div class="container">
+  <div class="stats">
+    <div class="stat-card"><div class="num" id="totalProducts">-</div><div class="label">Productos totales</div></div>
+    <div class="stat-card"><div class="num" id="creditsLeft" style="color:#008060">-</div><div class="label">Créditos disponibles</div></div>
+    <div class="stat-card"><div class="num" id="optimizedCount">0</div><div class="label">Optimizados hoy</div></div>
+  </div>
+
+  <p class="section-title">Productos de tu tienda</p>
+  <div class="products-grid" id="productsList">
+    <div style="text-align:center;padding:2rem;color:#666">Cargando productos...</div>
+  </div>
+
+  <div class="plans-section">
+    <p class="section-title">💳 Comprar créditos</p>
+    <div class="plans-grid" id="plansGrid">Cargando planes...</div>
+  </div>
+
+  <div class="history-section">
+    <p class="section-title">📊 Historial de optimizaciones</p>
+    <div id="historyList"><div style="color:#666;font-size:.875rem">Sin optimizaciones aún.</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://seo-plugins-seo-backend.g6kmjk.easypanel.host';
+let shopData = {};
+let optimizedToday = 0;
+
+function showToast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = ok ? '#16a34a' : '#dc2626';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function loadData() {
+  try {
+    const [meResp, prodResp, histResp, plansResp] = await Promise.all([
+      fetch(API+'/api/me', {credentials:'include'}),
+      fetch(API+'/api/products', {credentials:'include'}),
+      fetch(API+'/api/optimizations', {credentials:'include'}),
+      fetch(API+'/payments/plans', {credentials:'include'})
+    ]);
+    shopData = await meResp.json();
+    const {products} = await prodResp.json();
+    const {optimizations} = await histResp.json();
+    const {plans} = await plansResp.json();
+
+    document.getElementById('creditsBadge').textContent = shopData.is_unlimited ? '∞ Ilimitado' : shopData.credits + ' créditos';
+    document.getElementById('creditsLeft').textContent = shopData.is_unlimited ? '∞' : shopData.credits;
+    document.getElementById('totalProducts').textContent = products?.length || 0;
+
+    const today = new Date().toDateString();
+    optimizedToday = optimizations?.filter(o => new Date(o.created_at).toDateString() === today).length || 0;
+    document.getElementById('optimizedCount').textContent = optimizedToday;
+
+    renderProducts(products || []);
+    renderPlans(plans || []);
+    renderHistory(optimizations || []);
+  } catch(e) {
+    showToast('Error cargando datos', false);
+  }
+}
+
+function renderProducts(products) {
+  const el = document.getElementById('productsList');
+  if (!products.length) { el.innerHTML = '<div style="color:#666;padding:1rem">No hay productos</div>'; return; }
+  el.innerHTML = products.map(p => {
+    const desc = (p.body_html || '').replace(/<[^>]*>/g,'').slice(0,80) || 'Sin descripción';
+    return `<div class="product-card" id="pc-${p.id}">
+      <div class="product-info">
+        <div class="product-title">${p.title}</div>
+        <div class="product-desc">${desc}</div>
+      </div>
+      <button class="btn btn-primary" onclick="optimizeProduct('${p.id}', this)">Optimizar SEO</button>
+    </div>`;
+  }).join('');
+}
+
+function renderPlans(plans) {
+  const labels = ['starter','growth','pro'];
+  const el = document.getElementById('plansGrid');
+  el.innerHTML = plans.map((p,i) => `
+    <div class="plan-card ${i===1?'popular':''}">
+      ${i===1?'<div class="plan-badge">⭐ Más popular</div>':''}
+      <div class="plan-name">${p.name.split('-')[0].trim()}</div>
+      <div class="plan-price">$${(p.priceCOP/1000).toFixed(0)}K <span>COP</span></div>
+      <div class="plan-credits">${p.credits} créditos SEO</div>
+      <button class="btn btn-primary" style="width:100%" onclick="buyPlan('${labels[i]}')">Comprar</button>
+    </div>`).join('');
+}
+
+function renderHistory(opts) {
+  const el = document.getElementById('historyList');
+  if (!opts.length) { el.innerHTML = '<div style="color:#666;font-size:.875rem">Sin optimizaciones aún.</div>'; return; }
+  el.innerHTML = opts.slice(0,10).map(o => `
+    <div class="history-item">
+      <div>
+        <div class="before">${o.original_title}</div>
+        <div class="after">→ ${o.optimized_title}</div>
+      </div>
+      <div style="color:#999;font-size:.75rem">${new Date(o.created_at).toLocaleDateString('es-CO')}</div>
+    </div>`).join('');
+}
+
+async function optimizeProduct(productId, btn) {
+  if (!shopData.is_unlimited && shopData.credits <= 0) {
+    showToast('Sin créditos. Compra un plan para continuar.', false); return;
+  }
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span>Optimizando...';
+  try {
+    const resp = await fetch(API+'/api/optimize/'+productId, {
+      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast('✅ Producto optimizado con IA');
+      shopData.credits = data.credits;
+      document.getElementById('creditsBadge').textContent = data.is_unlimited ? '∞ Ilimitado' : data.credits + ' créditos';
+      document.getElementById('creditsLeft').textContent = data.is_unlimited ? '∞' : data.credits;
+      optimizedToday++;
+      document.getElementById('optimizedCount').textContent = optimizedToday;
+      btn.textContent = '✅ Optimizado';
+      btn.style.background = '#16a34a';
+      // Actualizar título en la card
+      const card = document.getElementById('pc-'+productId);
+      if (card) card.querySelector('.product-title').textContent = data.seo.title;
+    } else {
+      showToast(data.error || 'Error al optimizar', false);
+      btn.disabled = false; btn.textContent = original;
+    }
+  } catch(e) {
+    showToast('Error de red', false);
+    btn.disabled = false; btn.textContent = original;
+  }
+}
+
+async function buyPlan(planId) {
+  try {
+    const resp = await fetch(API+'/payments/create-checkout', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({plan: planId})
+    });
+    const data = await resp.json();
+    if (data.url) { window.location.href = data.url; }
+    else showToast(data.error || 'Error creando pago', false);
+  } catch(e) {
+    showToast('Error de red', false);
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
