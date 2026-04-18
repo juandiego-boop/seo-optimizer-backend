@@ -69,32 +69,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="authScreen" class="screen active">
   <div style="background:#008060;color:white;padding:1rem 2rem;text-align:center"><h1 style="font-size:1.2rem">SEO Optimizer Pro</h1></div>
   <div class="auth-screen">
-    <div style="font-size:3rem;margin-bottom:1rem;font-family:serif">SEO</div>
+    <div style="font-size:2.5rem;margin-bottom:1rem">&#128275;</div>
     <h2>Conectar tu tienda</h2>
-    <form action="https://seo-plugins-seo-backend.g6kmjk.easypanel.host/app"
-          method="GET"
-          target="_blank">
-
-      <input
-        id="shopInput"
-        class="auth-input"
-        type="hidden"
-        name="shop"
-        placeholder="mitienda.myshopify.com"
-      >
-
-      <button class="btn btn-primary" style="width:100%;padding:.75rem" type="submit">
-        Conectar
-      </button>
-
-    </form><script>
-const params = new URLSearchParams(window.location.search);
-const shop = params.get("shop");
-
-if (shop) {
-  document.getElementById("shopInput").value = shop;
-}
-</script>
+    <p style="color:#666;margin-bottom:1.5rem;font-size:.9rem">Ingresa el dominio de tu tienda Shopify</p>
+    <input id="shopInput" class="auth-input" type="text" placeholder="mitienda.myshopify.com">
+    <button class="btn btn-primary" style="width:100%;padding:.75rem" onclick="doLogin()">Conectar</button>
+    <p style="margin-top:1rem;font-size:.8rem;color:#999">Primera vez? Instala la app desde tu admin de Shopify</p>
   </div>
 </div>
 <div id="appScreen" class="screen">
@@ -126,6 +106,7 @@ if (shop) {
 var API='https://seo-plugins-seo-backend.g6kmjk.easypanel.host';
 var shopData={};
 var optimizedToday=0;
+
 function showToast(msg,ok){
   var t=document.getElementById('toast');
   t.textContent=msg;
@@ -146,18 +127,21 @@ function updateCredits(d){
 }
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function cc(val,max){var n=(val||'').length;var c=n>max?'over':n>max*.9?'warn':'';return '<div class="char-count '+c+'">'+n+' / '+max+'</div>';}
+
 async function doLogin(){
   var shop=document.getElementById('shopInput').value.trim();
   if(!shop){showToast('Ingresa el dominio',false);return;}
   if(!shop.includes('.myshopify.com'))shop=shop+'.myshopify.com';
   try{
-    var r=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
+    var r=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
     var d=await r.json();
     if(d.ok){updateCredits(d);showScreen('appScreen');loadAppData();}
-    else if(d.needsAuth){window.top.location.href=API+'/auth?shop='+shop;}
+    else if(d.needsAuth){window.location.href=API+'/auth?shop='+encodeURIComponent(shop);}
     else showToast(d.error||'Error al conectar',false);
   }catch(e){showToast('Error de conexion',false);}
 }
+
 async function loadAppData(){
   try{
     var r1=await fetch(API+'/api/me',{credentials:'include'});
@@ -181,6 +165,7 @@ async function loadAppData(){
     renderHistory(opts);
   }catch(e){showToast('Error cargando datos',false);}
 }
+
 function renderProducts(prods,opts){
   var el=document.getElementById('productsList');
   if(!prods.length){el.innerHTML='<div style="color:#666;padding:1rem">No hay productos</div>';return;}
@@ -188,10 +173,24 @@ function renderProducts(prods,opts){
   el.innerHTML=prods.map(function(p){
     var desc=(p.body_html||'').replace(/<[^>]*>/g,'').slice(0,100)||'Sin descripcion';
     var wasOpt=optIds.has(String(p.id));
-    return '<div class="product-card'+(wasOpt?' optimized':'')+'" id="pc-'+p.id+'">'+ '<div class="product-top">'+ '<div class="product-info">'+ '<div class="product-title" id="pt-'+p.id+'">'+escH(p.title)+'</div>'+ '<div class="product-desc">'+escH(desc)+'</div>'+ '</div>'+ '<button class="btn '+(wasOpt?'btn-outline':'btn-primary')+'" id="btn-'+p.id+'" onclick="suggestSEO(\''+ p.id+'\',this)">'+(wasOpt?'Reoptimizar':'Sugerir SEO')+'</button>'+ '</div>'+ '<div class="suggest-panel" id="sp-'+p.id+'"></div>'+ '</div>';
+    return '<div class="product-card'+(wasOpt?' optimized':'')+'" id="pc-'+p.id+'">'+
+      '<div class="product-top">'+
+        '<div class="product-info">'+
+          '<div class="product-title" id="pt-'+p.id+'">'+escH(p.title)+'</div>'+
+          '<div class="product-desc">'+escH(desc)+'</div>'+
+        '</div>'+
+        '<button class="btn '+(wasOpt?'btn-outline':'btn-primary')+'" id="btn-'+p.id+
+          '" onclick="suggestSEO(''+p.id+'',this)">'+
+          (wasOpt?'Reoptimizar':'Sugerir SEO')+
+        '</button>'+
+      '</div>'+
+      '<div class="suggest-panel" id="sp-'+p.id+'"></div>'+
+    '</div>';
   }).join('');
 }
+
 function updateChar(el,max,cid){document.getElementById(cid).innerHTML=cc(el.value,max);}
+
 async function suggestSEO(pid,btn){
   if(!shopData.is_unlimited&&shopData.credits<=0){showToast('Sin creditos. Compra un plan.',false);return;}
   var orig=btn.innerHTML;
@@ -199,26 +198,53 @@ async function suggestSEO(pid,btn){
   var panel=document.getElementById('sp-'+pid);
   panel.classList.remove('show');
   try{
-    var r=await fetch(API+'/api/suggest/'+pid,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'}});
+    var r=await fetch(API+'/api/suggest/'+pid,{method:'POST',credentials:'include',
+      headers:{'Content-Type':'application/json'}});
     var d=await r.json();
     if(!d.success){showToast(d.error||'Error',false);btn.disabled=false;btn.innerHTML=orig;return;}
     var s=d.suggested;
     var dt=(s.body_html||'').replace(/<[^>]*>/g,'');
-    panel.innerHTML='<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">Sugerencia IA - edita y confirma para guardar en Shopify</div>'+ '<div class="field-group"><div class="field-label">Titulo SEO <span>Max 70</span></div>'+'<input class="field-input" id="fi-t-'+pid+'" type="text" maxlength="80" value="'+escH(s.title||'')+'" oninput="updateChar(this,70,\'fc-t-'+pid+'\')">'+ '<div id="fc-t-'+pid+'">'+cc(s.title,70)+'</div></div>'+ '<div class="field-group"><div class="field-label">Meta descripcion <span>Max 155</span></div>'+'<textarea class="field-input" id="fi-m-'+pid+'" rows="2" maxlength="200" oninput="updateChar(this,155,\'fc-m-'+pid+'\')">'+ escH(s.meta_description||'')+'</textarea>'+ '<div id="fc-m-'+pid+'">'+cc(s.meta_description,155)+'</div></div>'+ '<div class="field-group"><div class="field-label">Descripcion</div>'+'<textarea class="field-input" id="fi-d-'+pid+'" rows="4">'+ escH(dt)+'</textarea></div>'+ '<div class="field-group"><div class="field-label">Alt imagen <span>Max 125</span></div>'+'<input class="field-input" id="fi-a-'+pid+'" type="text" maxlength="130" value="'+escH(s.image_alt||'')+'" oninput="updateChar(this,125,\'fc-a-'+pid+'\')">'+ '<div id="fc-a-'+pid+'">'+cc(s.image_alt,125)+'</div></div>'+ '<div class="action-row">'+ '<button class="btn btn-primary" onclick="confirmSEO(\''+ pid+'\',this)">Confirmar y guardar en Shopify</button>'+ '<button class="btn btn-danger" onclick="document.getElementById(\'sp-'+ pid+'\').classList.remove(\'show\')">Cancelar</button>'+ '</div>';
+    panel.innerHTML=
+      '<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">'+
+      'Sugerencia IA - edita y confirma para guardar en Shopify</div>'+
+      '<div class="field-group"><div class="field-label">Titulo SEO <span>Max 70</span></div>'+
+      '<input class="field-input" id="fi-t-'+pid+'" type="text" maxlength="80" value="'+escH(s.title||'')+
+      '" oninput="updateChar(this,70,'fc-t-'+pid+'')">'+
+      '<div id="fc-t-'+pid+'">'+cc(s.title,70)+'</div></div>'+
+      '<div class="field-group"><div class="field-label">Meta descripcion <span>Max 155</span></div>'+
+      '<textarea class="field-input" id="fi-m-'+pid+'" rows="2" maxlength="200" '+
+      'oninput="updateChar(this,155,'fc-m-'+pid+'')">'+escH(s.meta_description||'')+'</textarea>'+
+      '<div id="fc-m-'+pid+'">'+cc(s.meta_description,155)+'</div></div>'+
+      '<div class="field-group"><div class="field-label">Descripcion</div>'+
+      '<textarea class="field-input" id="fi-d-'+pid+'" rows="4">'+escH(dt)+'</textarea></div>'+
+      '<div class="field-group"><div class="field-label">Alt imagen <span>Max 125</span></div>'+
+      '<input class="field-input" id="fi-a-'+pid+'" type="text" maxlength="130" value="'+escH(s.image_alt||'')+
+      '" oninput="updateChar(this,125,'fc-a-'+pid+'')">'+
+      '<div id="fc-a-'+pid+'">'+cc(s.image_alt,125)+'</div></div>'+
+      '<div class="action-row">'+
+      '<button class="btn btn-primary" onclick="confirmSEO(''+pid+'',this)">'+
+      'Confirmar y guardar en Shopify</button>'+
+      '<button class="btn btn-danger" onclick="document.getElementById('sp-'+pid+
+      '').classList.remove('show')">Cancelar</button>'+
+      '</div>';
     panel.classList.add('show');
     btn.disabled=false;btn.innerHTML='Reoptimizar';
   }catch(e){showToast('Error de red',false);btn.disabled=false;btn.innerHTML=orig;}
 }
+
 async function confirmSEO(pid,btn){
   var title=(document.getElementById('fi-t-'+pid).value||'').trim();
   var meta=(document.getElementById('fi-m-'+pid).value||'').trim();
   var desc=(document.getElementById('fi-d-'+pid).value||'').trim();
   var alt=(document.getElementById('fi-a-'+pid).value||'').trim();
   if(!title){showToast('El titulo no puede estar vacio',false);return;}
-  var orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="loading"></span>Guardando...';
+  var orig=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='<span class="loading"></span>Guardando...';
   var bh=desc.startsWith('<')?desc:'<p>'+desc+'</p>';
   try{
-    var r=await fetch(API+'/api/confirm/'+pid,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:title,body_html:bh,meta_description:meta,image_alt:alt})});
+    var r=await fetch(API+'/api/confirm/'+pid,{method:'POST',credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title:title,body_html:bh,meta_description:meta,image_alt:alt})});
     var d=await r.json();
     if(d.success){
       showToast('Guardado en Shopify correctamente');
@@ -233,51 +259,69 @@ async function confirmSEO(pid,btn){
     }else{showToast(d.error||'Error al guardar',false);btn.disabled=false;btn.innerHTML=orig;}
   }catch(e){showToast('Error de red',false);btn.disabled=false;btn.innerHTML=orig;}
 }
+
 function renderPlans(plans){
   var labels=['starter','growth','pro'];
   var el=document.getElementById('plansGrid');
   el.innerHTML=plans.map(function(p,i){
-    return '<div class="plan-card'+(i===1?' popular':'')+'">' +(i===1?'<div class="plan-badge">Mas popular</div>':'')+'<div class="plan-name">'+escH(p.name)+'</div>'+'<div class="plan-price">$'+Math.round(p.priceCOP/1000)+'K <span style="font-size:.85rem;color:#666;font-weight:400">COP</span></div>'+'<div class="plan-credits">'+p.credits+' creditos</div>'+'<button class="btn btn-primary" style="width:100%" onclick="buyPlan(\''+ labels[i]+'\')">Comprar</button></div>';
+    return '<div class="plan-card'+(i===1?' popular':'')+'">'+(i===1?'<div class="plan-badge">Mas popular</div>':'')+
+      '<div class="plan-name">'+escH(p.name)+'</div>'+
+      '<div class="plan-price">$'+Math.round(p.priceCOP/1000)+'K <span style="font-size:.85rem;color:#666;font-weight:400">COP</span></div>'+
+      '<div class="plan-credits">'+p.credits+' creditos</div>'+
+      '<button class="btn btn-primary" style="width:100%" onclick="buyPlan(''+labels[i]+'')">Comprar</button></div>';
   }).join('');
 }
+
 function renderHistory(opts){
   var el=document.getElementById('historyList');
   if(!opts.length){el.innerHTML='<div style="color:#666;font-size:.875rem">Sin optimizaciones aun.</div>';return;}
   el.innerHTML=opts.slice(0,10).map(function(o){
-    return '<div class="history-item"><div style="display:flex;justify-content:space-between">'+'<div><div class="before">'+escH(o.original_title)+'</div><div class="after-title">--> '+escH(o.optimized_title)+'</div></div>'+'<div style="color:#999;font-size:.75rem;white-space:nowrap;margin-left:.5rem">'+ new Date(o.created_at).toLocaleDateString('es-CO')+'</div>'+'</div></div>';
+    return '<div class="history-item"><div style="display:flex;justify-content:space-between">'+
+      '<div><div class="before">'+escH(o.original_title)+'</div>'+
+      '<div class="after-title">'+escH(o.optimized_title)+'</div></div>'+
+      '<div style="color:#999;font-size:.75rem;white-space:nowrap;margin-left:.5rem">'+
+      new Date(o.created_at).toLocaleDateString('es-CO')+'</div>'+
+      '</div></div>';
   }).join('');
 }
+
 async function buyPlan(planId){
   try{
-    var r=await fetch(API+'/payments/create-checkout',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:planId})});
+    var r=await fetch(API+'/payments/create-checkout',{method:'POST',credentials:'include',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:planId})});
     var d=await r.json();
     if(d.url)window.location.href=d.url;
     else showToast(d.error||'Error',false);
   }catch(e){showToast('Error de red',false);}
 }
+
 async function init(){
   var params=new URLSearchParams(window.location.search);
   var shop=params.get('shop');
-  // Verificar sesion activa del servidor (establecida por OAuth de Shopify)
+  // Si hay shop en URL, hacer shop-login con esa tienda especifica
+  if(shop){
+    try{
+      var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
+      var d2=await r2.json();
+      if(d2.ok){updateCredits(d2);showScreen('appScreen');loadAppData();return;}
+      if(d2.needsAuth){
+        // Tienda no instalada: ir a OAuth solo si no venimos ya de auth
+        if(!params.get('from_auth')){
+          window.location.href=API+'/auth?shop='+encodeURIComponent(shop);
+          return;
+        }
+      }
+    }catch(e){}
+  }
+  // Sin shop en URL: intentar sesion existente
   try{
     var r=await fetch(API+'/api/me',{credentials:'include'});
-    if(r.ok){
-      var d=await r.json();
-      // Si hay shop en URL, verificar que coincide con la sesion
-      if(!shop || d.shop_domain===shop){
-        updateCredits(d);
-        showScreen('appScreen');
-        loadAppData();
-        return;
-      }
-    }
+    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
   }catch(e){}
-  // Sin sesion valida: ir a /app-login (requiere OAuth de Shopify)
-  if(shop){
-    window.location.href=API+'/app-login?shop='+encodeURIComponent(shop);
-  } else {
-    showScreen('authScreen');
-  }
+  // Mostrar pantalla de login
+  showScreen('authScreen');
+  if(shop)document.getElementById('shopInput').value=shop;
 }
 init();
 </script>
