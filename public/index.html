@@ -67,6 +67,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 <div id="authScreen" class="screen active">
+  <form action="guardar.php" method="post">
+
+<input type="text" name="shop" id="shop" value="">
+
+<button type="submit">Enviar</button>
+
+</form>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const shop = params.get("shop");
+
+document.getElementById("shop").value = shop;
+</script>
   <div style="background:#008060;color:white;padding:1rem 2rem;text-align:center"><h1 style="font-size:1.2rem">SEO Optimizer Pro</h1></div>
   <div class="auth-screen">
     <div style="font-size:3rem;margin-bottom:1rem;font-family:serif">SEO</div>
