@@ -69,7 +69,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="authScreen" class="screen active">
   <div style="background:#008060;color:white;padding:1rem 2rem;text-align:center"><h1 style="font-size:1.2rem">SEO Optimizer Pro</h1></div>
   <div class="auth-screen">
-    <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
+    <div style="font-size:3rem;margin-bottom:1rem">ð</div>
     <h2>Conectar tu tienda</h2>
     <p style="color:#666;margin-bottom:1.5rem;font-size:.9rem">Ingresa el dominio de tu tienda Shopify</p>
     <input id="shopInput" class="auth-input" type="text" placeholder="mitienda.myshopify.com">
@@ -88,15 +88,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="stat-card"><div class="num" id="creditsLeft">-</div><div class="label">Creditos</div></div>
       <div class="stat-card"><div class="num" id="optimizedCount">0</div><div class="label">Optimizados hoy</div></div>
     </div>
-    <div class="free-banner"><div style="font-size:1.5rem">🎁</div><div><strong>100 creditos gratis al instalar</strong><br><span style="font-size:.85rem;opacity:.9">La IA sugiere el SEO, tu editas y confirmas antes de guardar</span></div></div>
+    <div class="free-banner"><div style="font-size:1.5rem">ð</div><div><strong>100 creditos gratis al instalar</strong><br><span style="font-size:.85rem;opacity:.9">La IA sugiere el SEO, tu editas y confirmas antes de guardar</span></div></div>
     <p class="section-title">Productos de tu tienda</p>
     <div class="products-grid" id="productsList"><div style="text-align:center;padding:2rem;color:#666"><span class="loading" style="border-color:#008060;border-top-color:transparent"></span> Cargando...</div></div>
     <div class="plans-section">
-      <p class="section-title">💳 Comprar mas creditos</p>
+      <p class="section-title">ð³ Comprar mas creditos</p>
       <div class="plans-grid" id="plansGrid">Cargando...</div>
     </div>
     <div class="history-section">
-      <p class="section-title">📊 Historial de optimizaciones</p>
+      <p class="section-title">ð Historial de optimizaciones</p>
       <div id="historyList"><div style="color:#666;font-size:.875rem">Sin optimizaciones aun.</div></div>
     </div>
   </div>
@@ -203,7 +203,7 @@ async function suggestSEO(pid,btn){
     var s=d.suggested;
     var dt=(s.body_html||'').replace(/<[^>]*>/g,'');
     panel.innerHTML=
-      '<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">Sugerencia IA — edita si deseas y confirma para guardar en Shopify</div>'+
+      '<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">Sugerencia IA â edita si deseas y confirma para guardar en Shopify</div>'+
       '<div class="field-group"><div class="field-label">Titulo SEO <span>Max 70</span></div>'+
       '<input class="field-input" id="fi-t-'+pid+'" type="text" maxlength="80" value="'+escH(s.title||'')+'" oninput="updateChar(this,70,'fc-t-'+pid+'')">'+
       '<div id="fc-t-'+pid+'">'+cc(s.title,70)+'</div></div>'+
@@ -278,10 +278,6 @@ async function buyPlan(planId){
 }
 async function init(){
   var shop=getShopFromUrl();
-  try{
-    var r=await fetch(API+'/api/me',{credentials:'include'});
-    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
-  }catch(e){}
   if(shop){
     try{
       var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
@@ -290,6 +286,10 @@ async function init(){
       if(d2.needsAuth){window.location.href=API+'/auth?shop='+shop;return;}
     }catch(e){}
   }
+  try{
+    var r=await fetch(API+'/api/me',{credentials:'include'});
+    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
+  }catch(e){}
   showScreen('authScreen');
   if(shop)document.getElementById('shopInput').value=shop;
 }
