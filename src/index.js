@@ -105,7 +105,7 @@ app.get('/', async function(req, res) {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.use(express.static(path.join(__dirname, '../public')));
+// Static assets servidos explicitamente (no usar express.static para evitar que intercepte /)
 
 app.listen(PORT, '0.0.0.0', async function() {
   console.log('SEO Backend en puerto ' + PORT);
