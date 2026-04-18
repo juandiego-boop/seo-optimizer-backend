@@ -236,15 +236,28 @@ async function buyPlan(planId){
   }catch(e){showToast('Error de red',false);}
 }
 async function init(){
-  var params=new URLSearchParams(window.location.search);
-  var shop=params.get('shop');
-  var loggedIn=params.get('loggedIn');
-  // Si hay loggedIn en URL, o si /api/me ya tiene sesion, carga el dashboard
+  // Extraer shop de multiples fuentes
+  var shop=null;
+  try{
+    var params=new URLSearchParams(window.location.search);
+    shop=params.get('shop');
+    // Si no esta en search, buscar en el hash o en la URL completa
+    if(!shop){
+      var m=window.location.href.match(/[?&]shop=([^&]+)/);
+      if(m)shop=decodeURIComponent(m[1]);
+    }
+    // Leer del referrer de Shopify si aplica
+    if(!shop&&document.referrer){
+      var rm=document.referrer.match(/admin\.shopify\.com\/store\/([^/]+)/);
+      if(rm)shop=rm[1]+'.myshopify.com';
+    }
+  }catch(e){}
+  // Primero intentar sesion existente
   try{
     var r=await fetch(API+'/api/me',{credentials:'include'});
     if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
   }catch(e){}
-  // Si hay shop, intentar login directo via fetch (funciona en iframe)
+  // Si hay shop, login via fetch sin redireccion
   if(shop){
     try{
       var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
