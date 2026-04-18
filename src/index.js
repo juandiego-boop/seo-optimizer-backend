@@ -75,6 +75,10 @@ app.get('/app', function(req, res) {
 });
 
 app.get('/', function(req, res) {
+  var shop = req.query.shop;
+  if (shop) {
+    return res.redirect('/app-login?shop=' + encodeURIComponent(shop));
+  }
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
