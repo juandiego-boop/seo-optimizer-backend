@@ -265,6 +265,21 @@ async function init(){
       if(d2.ok){updateCredits(d2);showScreen('appScreen');loadAppData();return;}
     }catch(e){}
   }
+  // Ultimo intento: extraer shop del referrer de Shopify admin
+  var refShop=null;
+  try{
+    var rm2=document.referrer.match(/admin\.shopify\.com\/store\/([^/?]+)/);
+    if(rm2)refShop=rm2[1]+'.myshopify.com';
+  }catch(e){}
+  if(refShop&&!shop)shop=refShop;
+  if(shop){
+    // Intentar auto-conectar desde referrer
+    try{
+      var r3=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
+      var d3=await r3.json();
+      if(d3.ok){updateCredits(d3);showScreen('appScreen');loadAppData();return;}
+    }catch(e){}
+  }
   showScreen('authScreen');
   if(shop)document.getElementById('shopInput').value=shop;
 }
