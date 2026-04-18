@@ -346,6 +346,12 @@ async function buyPlan(planId) {
 async function init() {
   var params = new URLSearchParams(window.location.search);
   var shop = params.get("shop");
+  // Primero: sesion activa del servidor (establecida por / o /app-login con host param)
+  try {
+    var r = await fetch(API + "/api/me", {credentials: "include"});
+    if (r.ok) { var d = await r.json(); updateCredits(d); showScreen("appScreen"); loadAppData(); return; }
+  } catch(e) {}
+  // Segundo: shop-login si hay shop en URL
   if (shop) {
     try {
       var r2 = await fetch(API + "/api/shop-login", {
@@ -361,10 +367,7 @@ async function init() {
       }
     } catch(e) {}
   }
-  try {
-    var r = await fetch(API + "/api/me", {credentials: "include"});
-    if (r.ok) { var d = await r.json(); updateCredits(d); showScreen("appScreen"); loadAppData(); return; }
-  } catch(e) {}
+  // Tercero: mostrar formulario de login
   showScreen("authScreen");
   if (shop) document.getElementById("shopInput").value = shop;
 }
