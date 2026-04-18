@@ -82,11 +82,9 @@ app.get('/app', function(req, res) {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.get('/', function(req, res) {
-  // Shopify pasa shop y/o host como query params
+app.get('/', async function(req, res) {
   var shop = req.query.shop;
   var host = req.query.host;
-  // Intentar extraer shop del host (base64url de Shopify)
   if (!shop && host) {
     try {
       var decoded = Buffer.from(host, 'base64').toString('utf8');
@@ -95,8 +93,14 @@ app.get('/', function(req, res) {
     } catch(e) {}
   }
   if (shop) {
-    // Crear sesion y redirigir al app con loggedIn
-    return res.redirect('/app-login?shop=' + encodeURIComponent(shop));
+    try {
+      var s = await pool.query('SELECT id FROM shops WHERE shop_domain=$1', [shop]);
+      if (s.rows.length) {
+        req.session.shopId = s.rows[0].id;
+        req.session.shop = shop;
+        await new Promise(function(resolve) { req.session.save(resolve); });
+      }
+    } catch(e) {}
   }
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
