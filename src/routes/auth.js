@@ -51,8 +51,8 @@ router.get('/auth/callback', async function(req, res) {
 });
 
 router.get('/app-login', async function(req, res) {
-  // Intentar extraer shop del parametro 'host' de Shopify (base64url)
   let shop = req.query.shop;
+  // Decodificar host param de Shopify (base64url)
   if (!shop && req.query.host) {
     try {
       const decoded = Buffer.from(req.query.host, 'base64').toString('utf8');
@@ -60,16 +60,24 @@ router.get('/app-login', async function(req, res) {
       if (m) shop = m[1];
     } catch(e) {}
   }
-  // Sin shop: redirigir a /app (tiene selector de tienda)
-  if (!shop) return res.redirect('/app');
+  if (!shop) {
+    // Sin shop: servir HTML (el JS mostrara el formulario de login)
+    return res.sendFile(require('path').join(__dirname, '../../public/index.html'));
+  }
   try {
     const s = await pool.query('SELECT id FROM shops WHERE shop_domain=$1', [shop]);
-    if (!s.rows.length) return res.redirect('/auth?shop=' + encodeURIComponent(shop));
+    if (!s.rows.length) {
+      // Tienda no instalada: redirigir a OAuth (esto si funciona fuera del iframe)
+      return res.redirect('/auth?shop=' + encodeURIComponent(shop));
+    }
+    // Establecer sesion y servir HTML directamente (sin redirect para que funcione en iframe)
     req.session.shopId = s.rows[0].id;
     req.session.shop = shop;
-    res.redirect('/app?shop=' + encodeURIComponent(shop) + '&loggedIn=1');
+    req.session.save(function() {
+      res.sendFile(require('path').join(__dirname, '../../public/index.html'));
+    });
   } catch(e) {
-    res.redirect('/app?shop=' + encodeURIComponent(shop));
+    res.sendFile(require('path').join(__dirname, '../../public/index.html'));
   }
 });
 
