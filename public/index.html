@@ -15,7 +15,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .stat-card{background:white;padding:1.5rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);text-align:center}
 .stat-card .num{font-size:2rem;font-weight:700;color:#008060}
 .stat-card .label{font-size:.85rem;color:#666;margin-top:.3rem}
-.free-banner{background:linear-gradient(135deg,#008060,#00a47a);color:white;padding:1rem 1.5rem;border-radius:8px;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
+.free-banner{background:linear-gradient(135deg,#008060,#00a47a);color:white;padding:1rem 1.5rem;border-radius:8px;margin-bottom:1.5rem}
 .section-title{font-size:1.1rem;font-weight:600;margin-bottom:1rem;color:#333}
 .products-grid{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem}
 .product-card{background:white;border-radius:8px;padding:1.25rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.1)}
@@ -27,10 +27,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .suggest-panel{margin-top:1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:1.25rem;display:none}
 .suggest-panel.show{display:block}
 .field-group{margin-bottom:1rem}
-.field-label{font-size:.75rem;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;display:flex;justify-content:space-between;align-items:center}
+.field-label{font-size:.75rem;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;display:flex;justify-content:space-between}
 .field-label span{background:#e8f4f0;color:#008060;padding:.1rem .5rem;border-radius:10px;font-size:.7rem}
 .field-input{width:100%;padding:.6rem .8rem;border:1.5px solid #d1d5db;border-radius:6px;font-size:.875rem;font-family:inherit;resize:vertical}
-.field-input:focus{outline:none;border-color:#008060;box-shadow:0 0 0 3px rgba(0,128,96,.1)}
+.field-input:focus{outline:none;border-color:#008060}
 .char-count{font-size:.7rem;color:#9ca3af;text-align:right;margin-top:.2rem}
 .char-count.warn{color:#f59e0b}
 .char-count.over{color:#ef4444}
@@ -69,11 +69,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="authScreen" class="screen active">
   <div style="background:#008060;color:white;padding:1rem 2rem;text-align:center"><h1 style="font-size:1.2rem">SEO Optimizer Pro</h1></div>
   <div class="auth-screen">
-    <div style="font-size:3rem;margin-bottom:1rem">Ã°ÂÂÂ</div>
+    <div style="font-size:3rem;margin-bottom:1rem;font-family:serif">SEO</div>
     <h2>Conectar tu tienda</h2>
     <p style="color:#666;margin-bottom:1.5rem;font-size:.9rem">Ingresa el dominio de tu tienda Shopify</p>
     <input id="shopInput" class="auth-input" type="text" placeholder="mitienda.myshopify.com">
-    <button class="btn btn-primary" style="width:100%;padding:.75rem" onclick="loginWithShop()">Conectar</button>
+    <button class="btn btn-primary" style="width:100%;padding:.75rem" onclick="doLogin()">Conectar</button>
     <p style="margin-top:1rem;font-size:.8rem;color:#999">Primera vez? Usa el link de instalacion que recibiste</p>
   </div>
 </div>
@@ -88,15 +88,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="stat-card"><div class="num" id="creditsLeft">-</div><div class="label">Creditos</div></div>
       <div class="stat-card"><div class="num" id="optimizedCount">0</div><div class="label">Optimizados hoy</div></div>
     </div>
-    <div class="free-banner"><div style="font-size:1.5rem">Ã°ÂÂÂ</div><div><strong>100 creditos gratis al instalar</strong><br><span style="font-size:.85rem;opacity:.9">La IA sugiere el SEO, tu editas y confirmas antes de guardar</span></div></div>
+    <div class="free-banner"><strong>100 creditos gratis al instalar.</strong> La IA sugiere el SEO, tu editas y confirmas antes de guardar.</div>
     <p class="section-title">Productos de tu tienda</p>
     <div class="products-grid" id="productsList"><div style="text-align:center;padding:2rem;color:#666"><span class="loading" style="border-color:#008060;border-top-color:transparent"></span> Cargando...</div></div>
     <div class="plans-section">
-      <p class="section-title">Ã°ÂÂÂ³ Comprar mas creditos</p>
+      <p class="section-title">Comprar mas creditos</p>
       <div class="plans-grid" id="plansGrid">Cargando...</div>
     </div>
     <div class="history-section">
-      <p class="section-title">Ã°ÂÂÂ Historial de optimizaciones</p>
+      <p class="section-title">Historial de optimizaciones</p>
       <div id="historyList"><div style="color:#666;font-size:.875rem">Sin optimizaciones aun.</div></div>
     </div>
   </div>
@@ -117,12 +117,6 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
 }
-function getShopFromUrl(){
-  var p=new URLSearchParams(window.location.search);
-  var s=p.get('shop');
-  if(!s){var m=(document.referrer||'').match(/([a-z0-9-]+.myshopify.com)/);if(m)s=m[1];}
-  return s;
-}
 function updateCredits(d){
   var txt=d.is_unlimited?'Ilimitado':(d.credits||0)+' creditos';
   document.getElementById('creditsBadge').textContent=txt;
@@ -132,17 +126,11 @@ function updateCredits(d){
 }
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function cc(val,max){var n=(val||'').length;var c=n>max?'over':n>max*.9?'warn':'';return '<div class="char-count '+c+'">'+n+' / '+max+'</div>';}
-async function loginWithShop(shopOvr){
-  var shop=shopOvr||document.getElementById('shopInput').value.trim();
+function doLogin(){
+  var shop=document.getElementById('shopInput').value.trim();
   if(!shop){showToast('Ingresa el dominio',false);return;}
   if(!shop.includes('.myshopify.com'))shop=shop+'.myshopify.com';
-  try{
-    var r=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
-    var d=await r.json();
-    if(d.ok){updateCredits(d);showScreen('appScreen');loadAppData();}
-    else if(d.needsAuth){window.location.href=API+'/auth?shop='+shop;}
-    else showToast(d.error||'Error al conectar',false);
-  }catch(e){showToast('Error de conexion',false);}
+  window.location.href=API+'/app-login?shop='+shop;
 }
 async function loadAppData(){
   try{
@@ -150,7 +138,6 @@ async function loadAppData(){
     if(r1.status===401){showScreen('authScreen');return;}
     var me=await r1.json();
     updateCredits(me);
-    document.getElementById('totalProducts').textContent='...';
     var r2=await fetch(API+'/api/products',{credentials:'include'});
     var r3=await fetch(API+'/api/optimizations',{credentials:'include'});
     var r4=await fetch(API+'/payments/plans',{credentials:'include'});
@@ -175,18 +162,7 @@ function renderProducts(prods,opts){
   el.innerHTML=prods.map(function(p){
     var desc=(p.body_html||'').replace(/<[^>]*>/g,'').slice(0,100)||'Sin descripcion';
     var wasOpt=optIds.has(String(p.id));
-    return '<div class="product-card'+(wasOpt?' optimized':'')+'" id="pc-'+p.id+'">'+
-      '<div class="product-top">'+
-        '<div class="product-info">'+
-          '<div class="product-title" id="pt-'+p.id+'">'+escH(p.title)+'</div>'+
-          '<div class="product-desc">'+escH(desc)+'</div>'+
-        '</div>'+
-        '<button class="btn '+(wasOpt?'btn-outline':'btn-primary')+'" id="btn-'+p.id+'" onclick="suggestSEO(''+p.id+'',this)">'+
-          (wasOpt?'Reoptimizar':'Sugerir SEO')+
-        '</button>'+
-      '</div>'+
-      '<div class="suggest-panel" id="sp-'+p.id+'"></div>'+
-    '</div>';
+    return '<div class="product-card'+(wasOpt?' optimized':'')+'" id="pc-'+p.id+'">'+ '<div class="product-top">'+ '<div class="product-info">'+ '<div class="product-title" id="pt-'+p.id+'">'+escH(p.title)+'</div>'+ '<div class="product-desc">'+escH(desc)+'</div>'+ '</div>'+ '<button class="btn '+(wasOpt?'btn-outline':'btn-primary')+'" id="btn-'+p.id+'" onclick="suggestSEO(\''+ p.id+'\',this)">'+(wasOpt?'Reoptimizar':'Sugerir SEO')+'</button>'+ '</div>'+ '<div class="suggest-panel" id="sp-'+p.id+'"></div>'+ '</div>';
   }).join('');
 }
 function updateChar(el,max,cid){document.getElementById(cid).innerHTML=cc(el.value,max);}
@@ -202,23 +178,7 @@ async function suggestSEO(pid,btn){
     if(!d.success){showToast(d.error||'Error',false);btn.disabled=false;btn.innerHTML=orig;return;}
     var s=d.suggested;
     var dt=(s.body_html||'').replace(/<[^>]*>/g,'');
-    panel.innerHTML=
-      '<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">Sugerencia IA Ã¢ÂÂ edita si deseas y confirma para guardar en Shopify</div>'+
-      '<div class="field-group"><div class="field-label">Titulo SEO <span>Max 70</span></div>'+
-      '<input class="field-input" id="fi-t-'+pid+'" type="text" maxlength="80" value="'+escH(s.title||'')+'" oninput="updateChar(this,70,'fc-t-'+pid+'')">'+
-      '<div id="fc-t-'+pid+'">'+cc(s.title,70)+'</div></div>'+
-      '<div class="field-group"><div class="field-label">Meta descripcion <span>Max 155</span></div>'+
-      '<textarea class="field-input" id="fi-m-'+pid+'" rows="2" maxlength="200" oninput="updateChar(this,155,'fc-m-'+pid+'')">'+escH(s.meta_description||'')+'</textarea>'+
-      '<div id="fc-m-'+pid+'">'+cc(s.meta_description,155)+'</div></div>'+
-      '<div class="field-group"><div class="field-label">Descripcion del producto</div>'+
-      '<textarea class="field-input" id="fi-d-'+pid+'" rows="5">'+escH(dt)+'</textarea></div>'+
-      '<div class="field-group"><div class="field-label">Alt text imagen <span>Max 125</span></div>'+
-      '<input class="field-input" id="fi-a-'+pid+'" type="text" maxlength="130" value="'+escH(s.image_alt||'')+'" oninput="updateChar(this,125,'fc-a-'+pid+'')">'+
-      '<div id="fc-a-'+pid+'">'+cc(s.image_alt,125)+'</div></div>'+
-      '<div class="action-row">'+
-      '<button class="btn btn-primary" onclick="confirmSEO(''+pid+'',this)">Confirmar y guardar en Shopify</button>'+
-      '<button class="btn btn-danger" onclick="document.getElementById('sp-'+pid+'').classList.remove('show')">Cancelar</button>'+
-      '</div>';
+    panel.innerHTML='<div style="font-size:.8rem;font-weight:600;color:#008060;margin-bottom:.75rem">Sugerencia IA - edita y confirma para guardar en Shopify</div>'+ '<div class="field-group"><div class="field-label">Titulo SEO <span>Max 70</span></div>'+'<input class="field-input" id="fi-t-'+pid+'" type="text" maxlength="80" value="'+escH(s.title||'')+'" oninput="updateChar(this,70,\'fc-t-'+pid+'\')">'+ '<div id="fc-t-'+pid+'">'+cc(s.title,70)+'</div></div>'+ '<div class="field-group"><div class="field-label">Meta descripcion <span>Max 155</span></div>'+'<textarea class="field-input" id="fi-m-'+pid+'" rows="2" maxlength="200" oninput="updateChar(this,155,\'fc-m-'+pid+'\')">'+ escH(s.meta_description||'')+'</textarea>'+ '<div id="fc-m-'+pid+'">'+cc(s.meta_description,155)+'</div></div>'+ '<div class="field-group"><div class="field-label">Descripcion</div>'+'<textarea class="field-input" id="fi-d-'+pid+'" rows="4">'+ escH(dt)+'</textarea></div>'+ '<div class="field-group"><div class="field-label">Alt imagen <span>Max 125</span></div>'+'<input class="field-input" id="fi-a-'+pid+'" type="text" maxlength="130" value="'+escH(s.image_alt||'')+'" oninput="updateChar(this,125,\'fc-a-'+pid+'\')">'+ '<div id="fc-a-'+pid+'">'+cc(s.image_alt,125)+'</div></div>'+ '<div class="action-row">'+ '<button class="btn btn-primary" onclick="confirmSEO(\''+ pid+'\',this)">Confirmar y guardar en Shopify</button>'+ '<button class="btn btn-danger" onclick="document.getElementById(\'sp-'+ pid+'\').classList.remove(\'show\')">Cancelar</button>'+ '</div>';
     panel.classList.add('show');
     btn.disabled=false;btn.innerHTML='Reoptimizar';
   }catch(e){showToast('Error de red',false);btn.disabled=false;btn.innerHTML=orig;}
@@ -251,21 +211,14 @@ function renderPlans(plans){
   var labels=['starter','growth','pro'];
   var el=document.getElementById('plansGrid');
   el.innerHTML=plans.map(function(p,i){
-    return '<div class="plan-card'+(i===1?' popular':'')+'">'+(i===1?'<div class="plan-badge">Mas popular</div>':'')+
-      '<div class="plan-name">'+escH(p.name)+'</div>'+
-      '<div class="plan-price">$'+Math.round(p.priceCOP/1000)+'K <span style="font-size:.85rem;color:#666;font-weight:400">COP</span></div>'+
-      '<div class="plan-credits">'+p.credits+' creditos</div>'+
-      '<button class="btn btn-primary" style="width:100%" onclick="buyPlan(''+labels[i]+'')">Comprar</button></div>';
+    return '<div class="plan-card'+(i===1?' popular':'')+'">' +(i===1?'<div class="plan-badge">Mas popular</div>':'')+'<div class="plan-name">'+escH(p.name)+'</div>'+'<div class="plan-price">$'+Math.round(p.priceCOP/1000)+'K <span style="font-size:.85rem;color:#666;font-weight:400">COP</span></div>'+'<div class="plan-credits">'+p.credits+' creditos</div>'+'<button class="btn btn-primary" style="width:100%" onclick="buyPlan(\''+ labels[i]+'\')">Comprar</button></div>';
   }).join('');
 }
 function renderHistory(opts){
   var el=document.getElementById('historyList');
   if(!opts.length){el.innerHTML='<div style="color:#666;font-size:.875rem">Sin optimizaciones aun.</div>';return;}
   el.innerHTML=opts.slice(0,10).map(function(o){
-    return '<div class="history-item"><div style="display:flex;justify-content:space-between">'+
-      '<div><div class="before">'+escH(o.original_title)+'</div><div class="after-title">'+escH(o.optimized_title)+'</div></div>'+
-      '<div style="color:#999;font-size:.75rem;white-space:nowrap;margin-left:.5rem">'+new Date(o.created_at).toLocaleDateString('es-CO')+'</div>'+
-      '</div></div>';
+    return '<div class="history-item"><div style="display:flex;justify-content:space-between">'+'<div><div class="before">'+escH(o.original_title)+'</div><div class="after-title">--> '+escH(o.optimized_title)+'</div></div>'+'<div style="color:#999;font-size:.75rem;white-space:nowrap;margin-left:.5rem">'+ new Date(o.created_at).toLocaleDateString('es-CO')+'</div>'+'</div></div>';
   }).join('');
 }
 async function buyPlan(planId){
@@ -281,20 +234,19 @@ async function init(){
   var shop=params.get('shop');
   var loggedIn=params.get('loggedIn');
   if(shop&&!loggedIn){
-    window.location.href=API+'/app-login?shop='+shop;
+    window.location.href=API+'/app-login?shop='+encodeURIComponent(shop);
     return;
   }
   try{
     var r=await fetch(API+'/api/me',{credentials:'include'});
-    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
+    if(r.ok){
+      var d=await r.json();
+      updateCredits(d);
+      showScreen('appScreen');
+      loadAppData();
+      return;
+    }
   }catch(e){}
-  if(shop){
-    try{
-      var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
-      var d2=await r2.json();
-      if(d2.ok){updateCredits(d2);showScreen('appScreen');loadAppData();return;}
-    }catch(e){}
-  }
   showScreen('authScreen');
   if(shop)document.getElementById('shopInput').value=shop;
 }
