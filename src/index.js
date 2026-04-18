@@ -47,13 +47,21 @@ app.get('/api/me', async function(req, res) {
 });
 
 app.post('/api/shop-login', async function(req, res) {
-  const shop = req.body.shop;
-  if (!shop) return res.status(400).json({ error: 'Falta shop' });
+  // Requiere sesion activa establecida por OAuth de Shopify via /app-login
+  if (!req.session || !req.session.shopId) {
+    return res.status(401).json({ error: 'No autenticado', needsAuth: true });
+  }
   try {
-    const s = await pool.query('SELECT id,shop_domain,plan,credits,is_unlimited FROM shops WHERE shop_domain=$1', [shop]);
-    if (!s.rows.length) return res.status(404).json({ error: 'Tienda no registrada', needsAuth: true });
-    req.session.shopId = s.rows[0].id;
-    req.session.shop = shop;
+    const s = await pool.query(
+      'SELECT id,shop_domain,plan,credits,is_unlimited FROM shops WHERE id=$1',
+      [req.session.shopId]
+    );
+    if (!s.rows.length) return res.status(401).json({ error: 'Sesion invalida', needsAuth: true });
+    const shop = req.body.shop;
+    // Verificar que el shop del request coincide con la sesion activa
+    if (shop && s.rows[0].shop_domain !== shop) {
+      return res.status(403).json({ error: 'Shop no coincide con la sesion activa', needsAuth: true });
+    }
     res.json({ ok: true, shop_domain: s.rows[0].shop_domain, plan: s.rows[0].plan, credits: s.rows[0].credits, is_unlimited: s.rows[0].is_unlimited });
   } catch(e) {
     res.status(500).json({ error: e.message });
