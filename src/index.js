@@ -15,6 +15,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use('/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(cors({ origin: true, credentials: true }));
+
+// Permitir que Shopify cargue la app en iframe
+app.use(function(req, res, next) {
+  res.removeHeader('X-Frame-Options');
+  res.setHeader('Content-Security-Policy', "frame-ancestors https://*.myshopify.com https://admin.shopify.com");
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
