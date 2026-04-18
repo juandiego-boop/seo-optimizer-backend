@@ -126,11 +126,17 @@ function updateCredits(d){
 }
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function cc(val,max){var n=(val||'').length;var c=n>max?'over':n>max*.9?'warn':'';return '<div class="char-count '+c+'">'+n+' / '+max+'</div>';}
-function doLogin(){
+async function doLogin(){
   var shop=document.getElementById('shopInput').value.trim();
   if(!shop){showToast('Ingresa el dominio',false);return;}
   if(!shop.includes('.myshopify.com'))shop=shop+'.myshopify.com';
-  window.location.href=API+'/app-login?shop='+shop;
+  try{
+    var r=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
+    var d=await r.json();
+    if(d.ok){updateCredits(d);showScreen('appScreen');loadAppData();}
+    else if(d.needsAuth){window.top.location.href=API+'/auth?shop='+shop;}
+    else showToast(d.error||'Error al conectar',false);
+  }catch(e){showToast('Error de conexion',false);}
 }
 async function loadAppData(){
   try{
@@ -233,20 +239,19 @@ async function init(){
   var params=new URLSearchParams(window.location.search);
   var shop=params.get('shop');
   var loggedIn=params.get('loggedIn');
-  if(shop&&!loggedIn){
-    window.location.href=API+'/app-login?shop='+encodeURIComponent(shop);
-    return;
-  }
+  // Si hay loggedIn en URL, o si /api/me ya tiene sesion, carga el dashboard
   try{
     var r=await fetch(API+'/api/me',{credentials:'include'});
-    if(r.ok){
-      var d=await r.json();
-      updateCredits(d);
-      showScreen('appScreen');
-      loadAppData();
-      return;
-    }
+    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
   }catch(e){}
+  // Si hay shop, intentar login directo via fetch (funciona en iframe)
+  if(shop){
+    try{
+      var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
+      var d2=await r2.json();
+      if(d2.ok){updateCredits(d2);showScreen('appScreen');loadAppData();return;}
+    }catch(e){}
+  }
   showScreen('authScreen');
   if(shop)document.getElementById('shopInput').value=shop;
 }
