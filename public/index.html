@@ -236,28 +236,9 @@ async function buyPlan(planId){
   }catch(e){showToast('Error de red',false);}
 }
 async function init(){
-  // Extraer shop de multiples fuentes
-  var shop=null;
-  try{
-    var params=new URLSearchParams(window.location.search);
-    shop=params.get('shop');
-    // Si no esta en search, buscar en el hash o en la URL completa
-    if(!shop){
-      var m=window.location.href.match(/[?&]shop=([^&]+)/);
-      if(m)shop=decodeURIComponent(m[1]);
-    }
-    // Leer del referrer de Shopify si aplica
-    if(!shop&&document.referrer){
-      var rm=document.referrer.match(/admin\.shopify\.com\/store\/([^/]+)/);
-      if(rm)shop=rm[1]+'.myshopify.com';
-    }
-  }catch(e){}
-  // Primero intentar sesion existente
-  try{
-    var r=await fetch(API+'/api/me',{credentials:'include'});
-    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
-  }catch(e){}
-  // Si hay shop, login via fetch sin redireccion
+  var params=new URLSearchParams(window.location.search);
+  var shop=params.get('shop');
+  // Si hay shop en URL, siempre autenticar con ESA tienda (evita sesion cruzada)
   if(shop){
     try{
       var r2=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
@@ -265,21 +246,11 @@ async function init(){
       if(d2.ok){updateCredits(d2);showScreen('appScreen');loadAppData();return;}
     }catch(e){}
   }
-  // Ultimo intento: extraer shop del referrer de Shopify admin
-  var refShop=null;
+  // Sin shop en URL: intentar sesion existente
   try{
-    var rm2=document.referrer.match(/admin\.shopify\.com\/store\/([^/?]+)/);
-    if(rm2)refShop=rm2[1]+'.myshopify.com';
+    var r=await fetch(API+'/api/me',{credentials:'include'});
+    if(r.ok){var d=await r.json();updateCredits(d);showScreen('appScreen');loadAppData();return;}
   }catch(e){}
-  if(refShop&&!shop)shop=refShop;
-  if(shop){
-    // Intentar auto-conectar desde referrer
-    try{
-      var r3=await fetch(API+'/api/shop-login',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop:shop})});
-      var d3=await r3.json();
-      if(d3.ok){updateCredits(d3);showScreen('appScreen');loadAppData();return;}
-    }catch(e){}
-  }
   showScreen('authScreen');
   if(shop)document.getElementById('shopInput').value=shop;
 }
