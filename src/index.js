@@ -37,6 +37,11 @@ app.use('/api', optimizeRoutes);
 app.use('/', adminRoutes);
 app.use('/', paymentsRoutes);
 
+// Servir el panel de administracion
+app.get('/admin-panel', function(req, res) {
+  res.sendFile(path.join(__dirname, '../public/admin.html'));
+});
+
 // ===== RUTAS DE ADMIN =====
 const ADMIN_SECRET = 'seo_admin_2024_simbolo';
 
