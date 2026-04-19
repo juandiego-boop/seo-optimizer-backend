@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEO Optimizer Pro - Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+.header{background:#008060;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header h1{color:white;font-size:1.2rem;font-weight:600}
+.header .badge{background:rgba(255,255,255,.2);color:white;padding:.3rem .8rem;border-radius:20px;font-size:.75rem}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#1a1f2e;border:1px solid #2d3748;border-radius:12px;padding:2.5rem;width:360px;text-align:center}
+.login-box h2{color:#008060;margin-bottom:.5rem}
+.login-box p{color:#718096;font-size:.875rem;margin-bottom:1.5rem}
+.input{width:100%;padding:.75rem 1rem;background:#0f1117;border:1.5px solid #2d3748;border-radius:8px;color:#e2e8f0;font-size:.9rem;margin-bottom:1rem;font-family:inherit}
+.input:focus{outline:none;border-color:#008060}
+.btn{padding:.65rem 1.5rem;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:500;transition:all .2s}
+.btn-primary{background:#008060;color:white;width:100%}
+.btn-primary:hover{background:#006e52}
+.btn-sm{padding:.4rem .9rem;font-size:.8rem}
+.btn-green{background:#008060;color:white}
+.btn-green:hover{background:#006e52}
+.btn-yellow{background:#d97706;color:white}
+.btn-yellow:hover{background:#b45309}
+.btn-purple{background:#7c3aed;color:white}
+.btn-purple:hover{background:#6d28d9}
+.btn-red{background:#dc2626;color:white}
+.btn-red:hover{background:#b91c1c}
+.btn-outline{background:transparent;color:#008060;border:1.5px solid #008060}
+.btn-outline:hover{background:#008060;color:white}
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:#1a1f2e;border:1px solid #2d3748;border-radius:10px;padding:1.25rem;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:700;color:#008060}
+.stat-card .label{font-size:.8rem;color:#718096;margin-top:.25rem}
+.card{background:#1a1f2e;border:1px solid #2d3748;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem}
+.card-title{font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:#a0aec0;text-transform:uppercase;letter-spacing:.05em;font-size:.8rem}
+.search-bar{display:flex;gap:.75rem;margin-bottom:1rem}
+.search-bar .input{margin:0;flex:1}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.6rem 1rem;font-size:.75rem;color:#718096;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #2d3748}
+td{padding:.75rem 1rem;font-size:.875rem;border-bottom:1px solid #1a1f2e;vertical-align:middle}
+tr:hover td{background:#1e2535}
+.badge-plan{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-free{background:#1a2e1a;color:#4ade80}
+.badge-starter{background:#1a1a2e;color:#818cf8}
+.badge-growth{background:#2e1a1a;color:#f87171}
+.badge-pro{background:#2e2a1a;color:#fbbf24}
+.badge-unlimited{background:#0f2e2e;color:#34d399}
+.credits-chip{display:inline-block;background:#0f2e1a;color:#34d399;padding:.2rem .6rem;border-radius:6px;font-size:.8rem;font-weight:600}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#1a1f2e;border:1px solid #2d3748;border-radius:12px;padding:2rem;width:420px;max-width:95vw}
+.modal h3{margin-bottom:1.25rem;font-size:1rem}
+.modal label{display:block;font-size:.8rem;color:#718096;margin-bottom:.4rem}
+.modal .input{margin-bottom:1rem}
+.modal-footer{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:.75rem 1.5rem;border-radius:8px;font-size:.875rem;color:white;opacity:0;transition:opacity .3s;z-index:999;max-width:320px}
+.toast.show{opacity:1}
+.loading{text-align:center;padding:2rem;color:#718096}
+.tag-unlimited{background:#0f2e2e;color:#34d399;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;margin-left:.5rem}
+.screen{display:none}
+.screen.active{display:block}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="screen active">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div style="font-size:2.5rem;margin-bottom:1rem">&#128272;</div>
+      <h2>Panel Admin</h2>
+      <p>SEO Optimizer Pro</p>
+      <input id="adminKey" class="input" type="password" placeholder="Clave de administrador">
+      <button class="btn btn-primary" id="btnLogin">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminScreen" class="screen">
+  <div class="header">
+    <h1>&#9881;&#65039; SEO Optimizer Pro — Admin</h1>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span class="badge" id="headerStats">Cargando...</span>
+      <button class="btn btn-sm btn-outline" id="btnLogout" style="color:white;border-color:rgba(255,255,255,.4)">Salir</button>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="statTotal">-</div><div class="label">Tiendas instaladas</div></div>
+      <div class="stat-card"><div class="num" id="statUnlimited">-</div><div class="label">Con ilimitados</div></div>
+      <div class="stat-card"><div class="num" id="statCredits">-</div><div class="label">Creditos totales</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Acciones rapidas</div>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <button class="btn btn-green btn-sm" id="btnAddCredits">&#43; Agregar creditos</button>
+        <button class="btn btn-purple btn-sm" id="btnSetUnlimited">&#8734; Poner ilimitados</button>
+        <button class="btn btn-yellow btn-sm" id="btnSetCredits">&#9998; Establecer creditos</button>
+        <button class="btn btn-sm btn-outline" id="btnRefresh">&#8635; Recargar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tiendas instaladas</div>
+      <div class="search-bar">
+        <input id="searchInput" class="input" type="text" placeholder="Buscar tienda...">
+      </div>
+      <div id="shopsTable"><div class="loading">Cargando tiendas...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal agregar creditos -->
+<div class="modal-overlay" id="modalAdd">
+  <div class="modal">
+    <h3>&#43; Agregar creditos</h3>
+    <label>Tienda</label>
+    <input id="addShop" class="input" type="text" placeholder="tienda.myshopify.com">
+    <label>Creditos a agregar</label>
+    <input id="addCredits" class="input" type="number" value="100" min="1">
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-outline" id="btnCancelAdd">Cancelar</button>
+      <button class="btn btn-sm btn-green" id="btnConfirmAdd">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal set creditos -->
+<div class="modal-overlay" id="modalSet">
+  <div class="modal">
+    <h3>&#9998; Establecer creditos exactos</h3>
+    <label>Tienda</label>
+    <input id="setShop" class="input" type="text" placeholder="tienda.myshopify.com">
+    <label>Creditos totales</label>
+    <input id="setCredits" class="input" type="number" value="500" min="0">
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-outline" id="btnCancelSet">Cancelar</button>
+      <button class="btn btn-sm btn-yellow" id="btnConfirmSet">Establecer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ilimitados -->
+<div class="modal-overlay" id="modalUnlimited">
+  <div class="modal">
+    <h3>&#8734; Creditos ilimitados</h3>
+    <label>Tienda</label>
+    <input id="unlimitedShop" class="input" type="text" placeholder="tienda.myshopify.com">
+    <label style="margin-bottom:.75rem;display:block">Estado</label>
+    <div style="display:flex;gap:.75rem;margin-bottom:1rem">
+      <button class="btn btn-sm btn-green" id="btnSetOn">Activar ilimitados</button>
+      <button class="btn btn-sm btn-red" id="btnSetOff">Desactivar</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-outline" id="btnCancelUnlimited">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API = 'https://seo-plugins-seo-backend.g6kmjk.easypanel.host';
+var adminKey = '';
+var allShops = [];
+
+function showToast(msg, ok) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = ok === false ? '#dc2626' : '#008060';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function planBadge(plan, unlimited) {
+  if (unlimited) return '<span class="badge-plan badge-unlimited">ILIMITADO</span>';
+  var map = {free:'badge-free',starter:'badge-starter',growth:'badge-growth',pro:'badge-pro'};
+  return '<span class="badge-plan ' + (map[plan]||'badge-free') + '">' + (plan||'free').toUpperCase() + '</span>';
+}
+
+function renderTable(shops) {
+  if (!shops.length) {
+    document.getElementById('shopsTable').innerHTML = '<div class="loading">No hay tiendas</div>';
+    return;
+  }
+  var rows = shops.map(function(s) {
+    var date = new Date(s.created_at).toLocaleDateString('es-CO');
+    return '<tr>' +
+      '<td><span style="color:#e2e8f0;font-weight:500">' + s.shop_domain + '</span></td>' +
+      '<td>' + planBadge(s.plan, s.is_unlimited) + '</td>' +
+      '<td><span class="credits-chip">' + (s.is_unlimited ? '∞' : s.credits) + '</span></td>' +
+      '<td style="color:#718096;font-size:.75rem">' + date + '</td>' +
+      '<td style="display:flex;gap:.5rem;flex-wrap:wrap">' +
+        '<button class="btn btn-sm btn-green" onclick="quickAdd('' + s.shop_domain + '')">+100</button>' +
+        '<button class="btn btn-sm btn-purple" onclick="quickUnlimited('' + s.shop_domain + '',' + s.is_unlimited + ')">∞</button>' +
+        '<button class="btn btn-sm btn-outline" onclick="openAddModal('' + s.shop_domain + '')">Creditos</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('shopsTable').innerHTML =
+    '<table><thead><tr><th>Tienda</th><th>Plan</th><th>Creditos</th><th>Instalada</th><th>Acciones</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+async function loadShops() {
+  try {
+    var r = await fetch(API + '/admin/shops', {headers: {'x-admin-key': adminKey}});
+    if (r.status === 401) { showToast('Clave incorrecta', false); showScreen('loginScreen'); return; }
+    var d = await r.json();
+    allShops = d.shops || [];
+    var unlimited = allShops.filter(function(s) { return s.is_unlimited; }).length;
+    var totalCredits = allShops.reduce(function(acc, s) { return acc + (s.is_unlimited ? 0 : (s.credits||0)); }, 0);
+    document.getElementById('statTotal').textContent = allShops.length;
+    document.getElementById('statUnlimited').textContent = unlimited;
+    document.getElementById('statCredits').textContent = totalCredits.toLocaleString();
+    document.getElementById('headerStats').textContent = allShops.length + ' tiendas';
+    renderTable(allShops);
+  } catch(e) { showToast('Error de conexion', false); }
+}
+
+async function apiPost(path, body) {
+  var r = await fetch(API + path, {
+    method: 'POST',
+    headers: {'x-admin-key': adminKey, 'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+async function quickAdd(shop) {
+  try {
+    var d = await apiPost('/admin/add-credits', {shop: shop, credits: 100});
+    if (d.ok) { showToast('+100 creditos a ' + shop + ' — Total: ' + d.credits); loadShops(); }
+    else showToast(d.error || 'Error', false);
+  } catch(e) { showToast('Error', false); }
+}
+
+async function quickUnlimited(shop, current) {
+  try {
+    var d = await apiPost('/admin/set-unlimited', {shop: shop, unlimited: !current});
+    if (d.ok) { showToast((d.is_unlimited ? 'Ilimitado activado' : 'Ilimitado desactivado') + ' — ' + shop); loadShops(); }
+    else showToast(d.error || 'Error', false);
+  } catch(e) { showToast('Error', false); }
+}
+
+function openAddModal(shop) {
+  document.getElementById('addShop').value = shop || '';
+  showModal('modalAdd');
+}
+
+// Eventos botones principales
+document.getElementById('btnLogin').addEventListener('click', async function() {
+  var key = document.getElementById('adminKey').value.trim();
+  if (!key) return;
+  adminKey = key;
+  var r = await fetch(API + '/admin/shops', {headers: {'x-admin-key': key}});
+  if (r.ok) { showScreen('adminScreen'); loadShops(); }
+  else { showToast('Clave incorrecta', false); document.getElementById('adminKey').value = ''; }
+});
+
+document.getElementById('adminKey').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btnLogin').click();
+});
+
+document.getElementById('btnLogout').addEventListener('click', function() {
+  adminKey = ''; allShops = [];
+  document.getElementById('adminKey').value = '';
+  showScreen('loginScreen');
+});
+
+document.getElementById('btnRefresh').addEventListener('click', loadShops);
+
+document.getElementById('btnAddCredits').addEventListener('click', function() { openAddModal(''); });
+document.getElementById('btnSetCredits').addEventListener('click', function() { document.getElementById('setShop').value = ''; showModal('modalSet'); });
+document.getElementById('btnSetUnlimited').addEventListener('click', function() { document.getElementById('unlimitedShop').value = ''; showModal('modalUnlimited'); });
+
+// Busqueda
+document.getElementById('searchInput').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  renderTable(allShops.filter(function(s) { return s.shop_domain.toLowerCase().includes(q); }));
+});
+
+// Modales
+document.getElementById('btnCancelAdd').addEventListener('click', function() { hideModal('modalAdd'); });
+document.getElementById('btnConfirmAdd').addEventListener('click', async function() {
+  var shop = document.getElementById('addShop').value.trim();
+  var credits = parseInt(document.getElementById('addCredits').value);
+  if (!shop || !credits) return;
+  var d = await apiPost('/admin/add-credits', {shop: shop, credits: credits});
+  if (d.ok) { showToast('+' + credits + ' creditos a ' + shop + ' — Total: ' + d.credits); hideModal('modalAdd'); loadShops(); }
+  else showToast(d.error || 'Error', false);
+});
+
+document.getElementById('btnCancelSet').addEventListener('click', function() { hideModal('modalSet'); });
+document.getElementById('btnConfirmSet').addEventListener('click', async function() {
+  var shop = document.getElementById('setShop').value.trim();
+  var credits = parseInt(document.getElementById('setCredits').value);
+  if (!shop) return;
+  var d = await apiPost('/admin/set-credits', {shop: shop, credits: credits});
+  if (d.ok) { showToast('Creditos de ' + shop + ' → ' + d.credits); hideModal('modalSet'); loadShops(); }
+  else showToast(d.error || 'Error', false);
+});
+
+document.getElementById('btnCancelUnlimited').addEventListener('click', function() { hideModal('modalUnlimited'); });
+document.getElementById('btnSetOn').addEventListener('click', async function() {
+  var shop = document.getElementById('unlimitedShop').value.trim();
+  if (!shop) return;
+  var d = await apiPost('/admin/set-unlimited', {shop: shop, unlimited: true});
+  if (d.ok) { showToast('Ilimitado activado para ' + shop); hideModal('modalUnlimited'); loadShops(); }
+  else showToast(d.error || 'Error', false);
+});
+document.getElementById('btnSetOff').addEventListener('click', async function() {
+  var shop = document.getElementById('unlimitedShop').value.trim();
+  if (!shop) return;
+  var d = await apiPost('/admin/set-unlimited', {shop: shop, unlimited: false});
+  if (d.ok) { showToast('Ilimitado desactivado para ' + shop); hideModal('modalUnlimited'); loadShops(); }
+  else showToast(d.error || 'Error', false);
+});
+
+// Cerrar modales haciendo click afuera
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+  m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('show'); });
+});
+</script>
+</body>
+</html>
