@@ -37,6 +37,67 @@ app.use('/api', optimizeRoutes);
 app.use('/', adminRoutes);
 app.use('/', paymentsRoutes);
 
+// ===== RUTAS DE ADMIN =====
+const ADMIN_SECRET = 'seo_admin_2024_simbolo';
+
+function checkAdmin(req, res, next) {
+  const key = req.headers['x-admin-key'] || req.query.admin_key;
+  if (key !== ADMIN_SECRET) return res.status(401).json({ error: 'No autorizado' });
+  next();
+}
+
+// Listar todas las tiendas
+app.get('/admin/shops', checkAdmin, async function(req, res) {
+  try {
+    const s = await pool.query('SELECT id, shop_domain, plan, credits, is_unlimited, created_at FROM shops ORDER BY created_at DESC');
+    res.json({ shops: s.rows });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Agregar creditos a una tienda
+app.post('/admin/add-credits', checkAdmin, async function(req, res) {
+  const { shop, credits } = req.body;
+  if (!shop || !credits) return res.status(400).json({ error: 'Falta shop o credits' });
+  try {
+    const s = await pool.query(
+      'UPDATE shops SET credits = credits + $1 WHERE shop_domain = $2 RETURNING id, shop_domain, credits',
+      [parseInt(credits), shop]
+    );
+    if (!s.rows.length) return res.status(404).json({ error: 'Tienda no encontrada' });
+    res.json({ ok: true, shop: s.rows[0].shop_domain, credits: s.rows[0].credits });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Poner creditos ilimitados a una tienda
+app.post('/admin/set-unlimited', checkAdmin, async function(req, res) {
+  const { shop, unlimited } = req.body;
+  if (!shop) return res.status(400).json({ error: 'Falta shop' });
+  try {
+    const s = await pool.query(
+      'UPDATE shops SET is_unlimited = $1 WHERE shop_domain = $2 RETURNING id, shop_domain, is_unlimited',
+      [unlimited !== false, shop]
+    );
+    if (!s.rows.length) return res.status(404).json({ error: 'Tienda no encontrada' });
+    res.json({ ok: true, shop: s.rows[0].shop_domain, is_unlimited: s.rows[0].is_unlimited });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Establecer creditos exactos
+app.post('/admin/set-credits', checkAdmin, async function(req, res) {
+  const { shop, credits } = req.body;
+  if (!shop || credits === undefined) return res.status(400).json({ error: 'Falta shop o credits' });
+  try {
+    const s = await pool.query(
+      'UPDATE shops SET credits = $1 WHERE shop_domain = $2 RETURNING id, shop_domain, credits',
+      [parseInt(credits), shop]
+    );
+    if (!s.rows.length) return res.status(404).json({ error: 'Tienda no encontrada' });
+    res.json({ ok: true, shop: s.rows[0].shop_domain, credits: s.rows[0].credits });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ===== FIN RUTAS DE ADMIN =====
+
 app.get('/health', function(req, res) {
   res.json({ status: 'ok', ts: new Date().toISOString() });
 });
