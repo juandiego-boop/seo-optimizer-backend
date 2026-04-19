@@ -103,6 +103,78 @@ app.post('/admin/set-credits', checkAdmin, async function(req, res) {
 
 // ===== FIN RUTAS DE ADMIN =====
 
+
+// ===== RUTAS WOOCOMMERCE PLUGIN =====
+// Middleware para autenticar plugin WooCommerce via x-api-key
+async function wooAuth(req, res, next) {
+  const apiKey = req.headers['x-api-key'];
+  const siteUrl = req.headers['x-site-url'];
+  if (!apiKey || !siteUrl) return res.status(401).json({ error: 'Falta autenticacion' });
+  try {
+    const crypto = require('crypto');
+    const hash = crypto.createHash('sha256').update(apiKey).digest('hex');
+    const s = await pool.query(
+      'SELECT s.id, s.credits, s.is_unlimited, s.plan FROM licenses l JOIN shops s ON l.shop_id = s.id WHERE l.api_key_hash = $1 AND l.is_active = true',
+      [hash]
+    );
+    if (!s.rows.length) return res.status(401).json({ error: 'API Key invalida' });
+    req.wooShop = s.rows[0];
+    next();
+  } catch(e) { res.status(500).json({ error: e.message }); }
+}
+
+// Info del sitio (creditos)
+app.get('/woo/info', wooAuth, function(req, res) {
+  res.json({
+    credits: req.wooShop.credits,
+    is_unlimited: req.wooShop.is_unlimited,
+    plan: req.wooShop.plan
+  });
+});
+
+// Sugerir SEO para producto WooCommerce
+app.post('/woo/suggest', wooAuth, async function(req, res) {
+  const { product_id, title, description, short_desc, categories, sku, price } = req.body;
+  if (!product_id || !title) return res.status(400).json({ error: 'Falta product_id o title' });
+  const shop = req.wooShop;
+  if (!shop.is_unlimited && shop.credits <= 0) {
+    return res.status(402).json({ error: 'Sin creditos. Compra un plan.', needsCredits: true });
+  }
+  try {
+    const OpenAI = require('openai');
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const cats = Array.isArray(categories) ? categories.join(', ') : (categories || '');
+    const prompt = 'Eres un experto en SEO para tiendas WooCommerce. Optimiza el SEO de este producto.' +
+      '\n\nProducto: ' + title +
+      '\nCategoria: ' + cats +
+      '\nDescripcion actual: ' + (description || short_desc || '').replace(/<[^>]*>/g,'').slice(0,300) +
+      '\n\nDevuelve SOLO un JSON con estas claves exactas: title (max 70 chars), meta_description (max 155 chars), body_html (descripcion completa en HTML simple), image_alt (max 125 chars). Sin texto extra.';
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 600,
+      temperature: 0.7
+    });
+    const raw = completion.choices[0].message.content.replace(/```json|```/g, '').trim();
+    const suggested = JSON.parse(raw);
+    res.json({ success: true, suggested, product_id });
+  } catch(e) { res.status(500).json({ error: 'Error IA: ' + e.message }); }
+});
+
+// Confirmar y descontar credito WooCommerce
+app.post('/woo/confirm', wooAuth, async function(req, res) {
+  const { product_id, title, meta_description, image_alt } = req.body;
+  const shop = req.wooShop;
+  try {
+    if (!shop.is_unlimited) {
+      await pool.query('UPDATE shops SET credits = credits - 1 WHERE id = $1 AND credits > 0', [shop.id]);
+    }
+    const updated = await pool.query('SELECT credits FROM shops WHERE id = $1', [shop.id]);
+    res.json({ ok: true, credits: updated.rows[0].credits, is_unlimited: shop.is_unlimited });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+// ===== FIN RUTAS WOOCOMMERCE =====
+
 app.get('/health', function(req, res) {
   res.json({ status: 'ok', ts: new Date().toISOString() });
 });
