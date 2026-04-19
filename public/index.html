@@ -361,8 +361,8 @@ async function init() {
   var params = new URLSearchParams(window.location.search);
   var shop = params.get("shop");
   var loggedIn = params.get("loggedIn");
-  // 1. Si viene de Shopify (loggedIn=1 o shop en URL): intentar sesion directamente
-  if (shop || loggedIn) {
+  // 1. Solo saltar la clave si viene del servidor con loggedIn=1 (flujo OAuth real)
+  if (loggedIn === "1") {
     // Intentar sesion activa del servidor
     try {
       var r = await fetch(API + "/api/me", {credentials: "include"});
@@ -389,10 +389,26 @@ async function init() {
     if (shop) document.getElementById("shopInput").value = shop;
     return;
   }
-  // 2. Acceso directo (sin shop ni loggedIn): pedir clave de acceso
+  // 2. Acceso directo (con o sin ?shop=): pedir clave de acceso
   if (!checkAccessKey()) return;
-  // Clave correcta: mostrar formulario de login
+  // Clave correcta: intentar sesion o mostrar login
+  try {
+    var rm = await fetch(API + "/api/me", {credentials: "include"});
+    if (rm.ok) { var dm = await rm.json(); updateCredits(dm); showScreen("appScreen"); loadAppData(); return; }
+  } catch(e) {}
+  if (shop) {
+    try {
+      var rs = await fetch(API + "/api/shop-login", {
+        method: "POST", credentials: "include",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({shop: shop})
+      });
+      var ds = await rs.json();
+      if (ds.ok) { updateCredits(ds); showScreen("appScreen"); loadAppData(); return; }
+    } catch(e) {}
+  }
   showScreen("authScreen");
+  if (shop) document.getElementById("shopInput").value = shop;
 }
 init();
 </script>
